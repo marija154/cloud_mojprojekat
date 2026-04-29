@@ -11,7 +11,7 @@ namespace SmartGrid.Application.Features.DeviceStatuses.Commands;
 public record ExecuteMonitoringCommand : IRequest<Result>;
 
 // HANDLER
-public class ExecuteMonitoringHandler(
+internal class ExecuteMonitoringHandler(
     IDeviceRepository deviceRepository,
     IDomainEventDispatcher dispatcher,
     IParallelSettingsProvider parallelSettings,

@@ -11,6 +11,8 @@
     "AzureTableOptions:DeviceStatusesTable": "DeviceStatuses",
     "AzureBlobOptions:FirmwareBlob": "firmware-updates",
     "AzureBlobOptions:ConnectionString": "UseDevelopmentStorage=true",
+    "AzureQueueOptions:AlertQueue": "alert-queue",
+    "AzureQueueOptions:ConnectionString": "UseDevelopmentStorage=true",
     "ParallelSettings:MaxDegreeOfParallelism": 20
   }
 }
