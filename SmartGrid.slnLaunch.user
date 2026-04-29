@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "SmartGrid.Functions\\SmartGrid.Functions.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "SmartGrid.WebApi\\SmartGrid.WebApi.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
