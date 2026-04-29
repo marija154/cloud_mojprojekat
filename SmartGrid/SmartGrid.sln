@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartGrid.Application", "Sm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartGrid.Domain", "SmartGrid.Domain\SmartGrid.Domain.csproj", "{7BDC086E-82F6-D404-8233-FBEA247A16A8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartGrid.Tools", "SmartGrid.Tools\SmartGrid.Tools.csproj", "{8659DFC9-0149-F293-9402-147C23FBAF1D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{7BDC086E-82F6-D404-8233-FBEA247A16A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7BDC086E-82F6-D404-8233-FBEA247A16A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7BDC086E-82F6-D404-8233-FBEA247A16A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8659DFC9-0149-F293-9402-147C23FBAF1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8659DFC9-0149-F293-9402-147C23FBAF1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8659DFC9-0149-F293-9402-147C23FBAF1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8659DFC9-0149-F293-9402-147C23FBAF1D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

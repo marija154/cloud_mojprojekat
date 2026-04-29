@@ -12,36 +12,42 @@ public record ExecuteMonitoringCommand : IRequest<Result>;
 
 // HANDLER
 public class ExecuteMonitoringHandler(
-    IDeviceStatusRepository deviceStatusRepository,
-    IDateTimeProvider dateTimeProvider,
-    ILogger<ExecuteMonitoringHandler> logger
+    IDeviceRepository deviceRepository,
+    IDomainEventDispatcher dispatcher,
+    IParallelSettingsProvider parallelSettings,
+    ILogger<ExecuteMonitoringHandler> logger,
+    IDateTimeProvider dateTimeProvider
     ) : IRequestHandler<ExecuteMonitoringCommand, Result>
 {
     public async Task<Result> Handle(ExecuteMonitoringCommand request, CancellationToken ct)
     {
         try
         {
-            var deviceStatuses = deviceStatusRepository.GetAll();
+            var devices = deviceRepository.GetAllWithStatusStreamingAsync(ct);
 
-            foreach (var statuses in deviceStatuses)
+            var options = new ParallelOptions
             {
-                if (statuses is not null)
+                MaxDegreeOfParallelism = parallelSettings.MaxDegreeOfParallelism,
+                CancellationToken = ct
+            };
+
+            await Parallel.ForEachAsync(devices, options, async (device, token) =>
+            {
+                try
                 {
-                    var alert = statuses.GetCurrentAnomaly(dateTimeProvider.UtcNow);
+                    device.EvaluateMonitoring(dateTimeProvider.UtcNow);
 
-                    if (alert is not null)
+                    if (device.DomainEvents.Count != 0)
                     {
-                        string logMsg = $"[ALARM] {alert.AlertType} on {alert.DeviceId}: {alert.Message}";
-
-                        if (alert.AlertType == AlertType.Critical)
-                             logger.LogError(logMsg);
-                         else
-                             logger.LogWarning(logMsg);
+                        await dispatcher.DispatchAsync(device.DomainEvents, token);
+                        device.ClearDomainEvents();
                     }
                 }
-            }
-
-            await Task.CompletedTask; // Simulate async work
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "[MONITORING] Failed processing for Device {Id}", device.Id.Value);
+                }
+            });
 
             return Result.Success();
         }

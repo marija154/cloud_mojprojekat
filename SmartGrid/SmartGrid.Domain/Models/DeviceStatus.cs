@@ -8,6 +8,8 @@ namespace SmartGrid.Domain.Models
     public class DeviceStatus
     {
         public EntityId DeviceId { get; private set; }
+        public DeviceType DeviceType { get; private set; } = DeviceType.Unknown;
+
         // SNAPSHOT
         public Power CurrentPower { get; private set; }
         public Percentage LoadPercentage { get; private set; }
@@ -18,12 +20,14 @@ namespace SmartGrid.Domain.Models
         public bool IsOverloaded => LoadPercentage > DeviceStatusLimits.OverloadedLoad;
         private DeviceStatus(
             EntityId deviceId,
+            DeviceType deviceType,
             Power currentPower,
             Percentage loadPercentage,
             DateTime lastHeartbeat
         )
         {
             DeviceId = deviceId;
+            DeviceType = deviceType;
             CurrentPower = currentPower;
             LoadPercentage = loadPercentage;
             LastHeartbeat = lastHeartbeat;
@@ -31,10 +35,11 @@ namespace SmartGrid.Domain.Models
 
         #region Factory Method
 
-        public static DeviceStatus CreateDefault(EntityId deviceId, DateTime now)
+        public static DeviceStatus CreateDefault(EntityId deviceId, DeviceType deviceType, DateTime now)
         {
             return new DeviceStatus(
                 deviceId,
+                deviceType,
                 Power.Create(0).Value,
                 Percentage.Zero(),
                 now
@@ -42,6 +47,7 @@ namespace SmartGrid.Domain.Models
         }
         public static Result<DeviceStatus> Load(
                   string deviceId,
+                  DeviceType deviceType,
                   double currentPower,
                   double loadPercentage,
                   DateTime lastHeartbeat)
@@ -60,6 +66,7 @@ namespace SmartGrid.Domain.Models
 
             return Result<DeviceStatus>.Success(new DeviceStatus(
                 deviceIdResult.Value,
+                deviceType,
                 powerResult.Value,
                 Percentage.FromRaw(loadResult.Value),
                 lastHeartbeat

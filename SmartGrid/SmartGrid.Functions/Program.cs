@@ -11,6 +11,7 @@ using System.Text.Json.Serialization;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
+// HTTP API JSON configuration
 builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
 {
     options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
@@ -19,6 +20,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =
     options.SerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
 });
 
+// Internal configuration for serialization
 builder.Services.Configure<JsonSerializerOptions>(options =>
 {
     options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
@@ -38,7 +40,7 @@ builder.Services
 
 // Add Infrastructure and Application services
 builder.Services
-    .AddInfrastructure()
+    .AddInfrastructure(builder.Configuration)
     .AddApplication();
 
 builder.Build().Run();

@@ -1,3 +1,4 @@
+using SmartGrid.ITSimulator.Enums;
 using SmartGrid.ITSimulator.Models;
 
 namespace SmartGrid.ITSimulator.Services
@@ -15,7 +16,8 @@ namespace SmartGrid.ITSimulator.Services
 
         public TelemetryDTO GenerateTelemetry(string deviceId,
                                               string deviceName,
-                                              double nominalPower)
+                                              double nominalPower,
+                                              DeviceType deviceType)
         {
             if (string.IsNullOrWhiteSpace(deviceId))
                 throw new ArgumentException("Device Id cannot be empty", nameof(deviceName));
@@ -35,6 +37,7 @@ namespace SmartGrid.ITSimulator.Services
                 Timestamp = DateTime.UtcNow,
                 NominalPower = nominalPower,
                 CurrentPower = currentPower,
+                DeviceType = deviceType.ToString()
             };
         }
     }

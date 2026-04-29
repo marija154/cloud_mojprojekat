@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
+using SmartGrid.ITSimulator.Enums;
+using SmartGrid.ITSimulator.Models;
 using SmartGrid.ITSimulator.Services;
 using SmartGrid.ITSimulator.UI;
 
@@ -19,9 +21,30 @@ var maxVariation = double.Parse(configuration["SimulatorSettings:MaxPowerVariati
 ConsoleUI.PrintHeader();
 
 string deviceName = ConsoleUI.GetDeviceNameInput();
+DeviceType deviceType = ConsoleUI.GetDeviceTypeInput();
 double nominalPower = ConsoleUI.GetNominalPowerInput();
+string location = ConsoleUI.GetLocationInput();
 
 using var httpClient = new HttpClient { BaseAddress = new Uri(baseApiUrl) };
+
+var deviceClient = new DeviceClient(httpClient);
+
+string? deviceId =
+    await deviceClient.RegisterDeviceAsync(
+        new DeviceDTO
+        {
+            DeviceName = deviceName,
+            DeviceType = deviceType,
+            Location = location,
+            NominalPower = nominalPower
+        }
+    );
+
+if (deviceId == null)
+{
+    ConsoleUI.PrintCritical("Registration failed!");
+    return;
+}
 
 var simulator = new SimulatorService(maxVariation);
 var publisher = new TelemetryPublisher(httpClient);
@@ -32,7 +55,6 @@ Console.ResetColor();
 
 ConsoleUI.PrintStartMessage(deviceName, baseApiUrl + "/api/ReceiveTelemetry");
 
-string deviceId = Guid.NewGuid().ToString();
 
 try
 {
@@ -40,7 +62,8 @@ try
     {
         var telemetry = simulator.GenerateTelemetry(deviceId,
                                                     deviceName,
-                                                    nominalPower);
+                                                    nominalPower,
+                                                    deviceType);
         var (success, errorMessage) = await publisher.PublishSafeAsync(telemetry);
 
         if (success)

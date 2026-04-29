@@ -1,17 +1,26 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using SmartGrid.Application.Interfaces.Repositories;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using SmartGrid.Application.Common.Options;
+using SmartGrid.Infrastructure.Common.Options;
 using SmartGrid.Infrastructure.Extensions;
-using SmartGrid.Infrastructure.Persistence.InMemory.Repositories;
 
 namespace SmartGrid.Infrastructure
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+        public static IServiceCollection AddInfrastructure(
+            this IServiceCollection services,
+            IConfiguration configuration)
         {
-            services.AddServices();
+            services.Configure<AzureTableOptions>(configuration.GetSection("AzureTableOptions"));
+            services.Configure<ParallelSettings>(configuration.GetSection("ParallelSettings"));
 
-            services.AddSingleton<IDeviceStatusRepository, InMemoryDeviceRepository>();
+            var tableConn = configuration.GetValue<string>("AzureTableOptions:ConnectionString")
+                ?? throw new InvalidOperationException("AzureTableOptions:ConnectionString is not configured.");
+
+            services
+                .AddServices()
+                .AddAzureTables(tableConn);
 
             return services;
         }

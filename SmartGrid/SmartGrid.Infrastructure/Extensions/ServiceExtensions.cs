@@ -10,6 +10,10 @@ namespace SmartGrid.Infrastructure.Extensions
         {
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
+            services.AddScoped<IParallelSettingsProvider, ParallelSettingsProvider>();
+
+            services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+
             return services;
         }
     }

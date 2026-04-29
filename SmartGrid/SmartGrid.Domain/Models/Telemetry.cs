@@ -9,6 +9,7 @@ namespace SmartGrid.Domain.Models
         public EntityId Id { get; private set; }
         public EntityId DeviceId { get; private set; }
         public string DeviceName { get; private set; } = string.Empty;
+        public DeviceType DeviceType { get; private set; } = DeviceType.Unknown;
         public Power NominalPower { get; private set; }
         public Power CurrentPower { get; private set; }
         public DateTime Timestamp { get; private set; }
@@ -17,6 +18,7 @@ namespace SmartGrid.Domain.Models
             EntityId id,
             EntityId deviceId,
             string deviceName,
+            DeviceType deviceType,
             Power nominalPower,
             Power currentPower, 
             DateTime timestamp)
@@ -24,6 +26,7 @@ namespace SmartGrid.Domain.Models
             Id = id;
             DeviceId = deviceId;
             DeviceName = deviceName;
+            DeviceType = deviceType;
             NominalPower = nominalPower;
             CurrentPower = currentPower;
             Timestamp = timestamp;
@@ -37,12 +40,18 @@ namespace SmartGrid.Domain.Models
         public static Result<Telemetry> Create(
             string deviceId,
             string deviceName,
+            DeviceType deviceType,
             double nominalPower,
             double currentPower,
             DateTime timestamp)
         {
             if (string.IsNullOrWhiteSpace(deviceName))
                 return Result<Telemetry>.Failure("DeviceName is required.",
+                    ErrorType.Validation);
+
+            if (!Enum.IsDefined(typeof(DeviceType), deviceType)
+                || deviceType == DeviceType.Unknown)
+                return Result<Telemetry>.Failure("A valid and defined DeviceType must be specified.",
                     ErrorType.Validation);
 
             if (timestamp > DateTime.UtcNow)
@@ -66,6 +75,7 @@ namespace SmartGrid.Domain.Models
                 EntityId.New(),
                 idResult.Value,
                 deviceName,
+                deviceType,
                 nominalPowerResult.Value,
                 currentPowerResult.Value,
                 timestamp
@@ -75,6 +85,7 @@ namespace SmartGrid.Domain.Models
             string id,
             string deviceId,
             string deviceName,
+            DeviceType deviceType,
             double nominalPower,
             double currentPower,
             DateTime timestamp)
@@ -99,6 +110,7 @@ namespace SmartGrid.Domain.Models
                idResult.Value,
                deviceIdResult.Value,
                deviceName,
+               deviceType,
                nominalPowerResult.Value,
                currentPowerResult.Value,
                timestamp

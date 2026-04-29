@@ -1,8 +1,13 @@
 {
     "IsEncrypted": false,
-    "Values": {
-        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-        "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
-        "GridMonitorSchedule": "*/10 * * * * *"
-    }
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "GridMonitorSchedule": "*/10 * * * * *",
+    "AzureTableOptions:ConnectionString": "UseDevelopmentStorage=true",
+    "AzureTableOptions:TelemetriesTable": "Telemetries",
+    "AzureTableOptions:DevicesTable": "Devices",
+    "AzureTableOptions:DeviceStatusesTable": "DeviceStatuses",
+    "ParallelSettings:MaxDegreeOfParallelism": 20
+  }
 }

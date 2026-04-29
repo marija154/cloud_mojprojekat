@@ -1,7 +1,9 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using SmartGrid.Application.Common.Validators;
 using SmartGrid.Application.Features.Telemetries.Events;
+using SmartGrid.Application.Interfaces.Repositories;
 using SmartGrid.Domain.Common;
 using SmartGrid.Domain.Enums;
 using SmartGrid.Domain.Models;
@@ -13,6 +15,7 @@ namespace SmartGrid.Application.Features.Telemetries.Commands
     {
         public string DeviceId { get; set; } = string.Empty;
         public string DeviceName { get; init; } = string.Empty;
+        public DeviceType DeviceType { get; init; }
         public double NominalPower { get; init; }
         public double CurrentPower { get; init; }
         public DateTime Timestamp { get; init; }
@@ -29,6 +32,9 @@ namespace SmartGrid.Application.Features.Telemetries.Commands
             RuleFor(t => t.DeviceName)
                 .NotEmpty().WithMessage("DeviceName is required.");
 
+            RuleFor(t => t.DeviceType)
+                 .IsValidDeviceType();
+
             RuleFor(t => t.NominalPower)
                 .NotEmpty().WithMessage("NominalPower is missing from payload.")
                 .GreaterThan(0).WithMessage("NominalPower must be greater than zero.");
@@ -44,7 +50,8 @@ namespace SmartGrid.Application.Features.Telemetries.Commands
     }
 
     // HANDLER
-    public class ProcessTelemetryHandler(
+    internal class ProcessTelemetryHandler(
+        ITelemetryRepository telemetryRepository,
         IMediator mediator,
         ILogger<ProcessTelemetryHandler> logger) : IRequestHandler<ProcessTelemetryCommand, Result>
     {
@@ -53,6 +60,7 @@ namespace SmartGrid.Application.Features.Telemetries.Commands
             var telemetryResult = Telemetry.Create(
                 request.DeviceId,
                 request.DeviceName,
+                request.DeviceType,
                 request.NominalPower,
                 request.CurrentPower,
                 request.Timestamp
@@ -63,9 +71,12 @@ namespace SmartGrid.Application.Features.Telemetries.Commands
 
             var telemetry = telemetryResult.Value;
 
+            await telemetryRepository.SaveAsync(telemetry, ct);
+
             await mediator.Publish(new TelemetryProcessedEvent(telemetry), ct);
 
-            logger.LogInformation("[TELEMETRY] Event published.");
+            logger.LogInformation("[TELEMETRY] Telemetry data successfully saved and event published for Device: {DeviceId}",
+                telemetry.DeviceId);
 
             return Result.Success();
         }

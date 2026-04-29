@@ -1,3 +1,5 @@
+using SmartGrid.ITSimulator.Enums;
+
 namespace SmartGrid.ITSimulator.UI
 {
     public class ConsoleUI
@@ -16,6 +18,21 @@ namespace SmartGrid.ITSimulator.UI
             Console.Write("[INPUT] Enter Device Friendly Name: ");
             return Console.ReadLine()?.Trim() ?? "Generic Inverter";
         }
+        public static DeviceType GetDeviceTypeInput()
+        {
+            Console.WriteLine("[INPUT] Select Device Type:");
+            Console.WriteLine("  1. SolarPanel");
+            Console.WriteLine("  2. WindTurbine");
+            Console.Write("Selection (1-2): ");
+
+            string choice = Console.ReadLine() ?? "1";
+            return choice switch
+            {
+                "1" => DeviceType.SolarPanel,
+                "2" => DeviceType.WindTurbine,
+                _ => DeviceType.SolarPanel
+            };
+        }
         public static double GetNominalPowerInput()
         {
             Console.Write("[INPUT] Enter Nominal Power (Watts): ");
@@ -24,6 +41,11 @@ namespace SmartGrid.ITSimulator.UI
                 return nominalPower;
             }
             return 1000.0;
+        }
+        public static string GetLocationInput()
+        {
+            Console.Write("[INPUT] Enter Location (e.g., Belgrade_Plant_A): ");
+            return Console.ReadLine()?.Trim() ?? "Unknown_Location";
         }
         public static void PrintStartMessage(string deviceName, string apiUrl)
         {

@@ -1,36 +1,36 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using SmartGrid.Application.Features.Telemetries.Events;
-using SmartGrid.Application.Interfaces;
 using SmartGrid.Application.Interfaces.Repositories;
-using SmartGrid.Domain.Models;
 
 namespace SmartGrid.Application.Features.DeviceStatuses.EventHandlers;
 
 public class UpdateDeviceStatusHandler(
-        IDeviceStatusRepository deviceStatusRepository,
-        IDateTimeProvider dateTimeProvider,
+        IDeviceRepository deviceRepository,
         ILogger<UpdateDeviceStatusHandler> logger) : INotificationHandler<TelemetryProcessedEvent>
 {
 
-    public async Task Handle(TelemetryProcessedEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(TelemetryProcessedEvent notification, CancellationToken ct)
     {
         var telemetry = notification.Telemetry;
 
         try
         {
-            var deviceStatus = deviceStatusRepository.GetById(telemetry.DeviceId);
+            var device = await deviceRepository.GetWithStatusByIdAsync(
+                telemetry.DeviceType,
+                telemetry.DeviceId,
+                ct);
 
-            if (deviceStatus is null)
+            if (device is null)
             {
-                deviceStatus = DeviceStatus.CreateDefault(telemetry.DeviceId, dateTimeProvider.UtcNow);
+                logger.LogWarning("Cannot update status: Device {DeviceId} of type {DeviceType} not found.",
+                    telemetry.DeviceId, telemetry.DeviceType);
+                return;
             }
 
-            deviceStatus.UpdateTelemetry(telemetry);
+            device.ProcessTelemetry(telemetry);
 
-            deviceStatusRepository.Save(deviceStatus);
-
-            await Task.CompletedTask; // Simulate async work
+            await deviceRepository.SaveStatusAsync(device.Status, ct);
 
             logger.LogInformation("Successfully updated status for device {DeviceId}.", telemetry.DeviceId);
         }
