@@ -7,11 +7,12 @@
     "AzureTableOptions:ConnectionString": "UseDevelopmentStorage=true",
     "AzureTableOptions:TelemetriesTable": "Telemetries",
     "AzureTableOptions:DevicesTable": "Devices",
-    "AzureTableOptions:FirmwaresTable": "Firmwares",
     "AzureTableOptions:DeviceStatusesTable": "DeviceStatuses",
+    "AzureTableOptions:FirmwaresTable": "Firmwares",
     "AzureBlobOptions:FirmwareBlob": "firmware-updates",
     "AzureBlobOptions:ConnectionString": "UseDevelopmentStorage=true",
     "AzureQueueOptions:AlertQueue": "alert-queue",
+    "AzureQueueOptions:DeviceStatusQueue": "device-status-queue",
     "AzureQueueOptions:ConnectionString": "UseDevelopmentStorage=true",
     "ParallelSettings:MaxDegreeOfParallelism": 20
   }

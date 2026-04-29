@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SmartGrid.Application.Common;
-using SmartGrid.Application.Common.Extensions.SmartGrid.Application.Common.Extensions;
+using SmartGrid.Application.Common.Extensions;
 using SmartGrid.Application.Interfaces.Storage;
 using SmartGrid.Infrastructure.Common.Options;
 
@@ -12,7 +12,7 @@ namespace SmartGrid.Infrastructure.Persistence.AzureBlob.Storages
         BlobServiceClient blobServiceClient,
         ILogger<FirmwareBlobStorage> logger,
         IOptions<AzureBlobOptions> options
-    )
+    ) 
         : AzureBlobStorage<FirmwareMetadata>(
             blobServiceClient.GetBlobContainerClient(options.Value.FirmwareBlob),
             logger),

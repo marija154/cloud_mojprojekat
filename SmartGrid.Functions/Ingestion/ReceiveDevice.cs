@@ -8,7 +8,7 @@ using SmartGrid.Functions.Extensions;
 
 namespace SmartGrid.Functions.Ingestion;
 
-public class ReceiveDevice(IMediator mediator)
+internal class ReceiveDevice(IMediator mediator)
 {
     [Function("ReceiveDevice")]
     public async Task<IActionResult> Run(

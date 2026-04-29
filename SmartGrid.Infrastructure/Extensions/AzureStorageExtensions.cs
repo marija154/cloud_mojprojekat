@@ -1,10 +1,13 @@
 ﻿using Azure.Data.Tables;
 using Azure.Storage.Blobs;
+using Azure.Storage.Queues;
 using Microsoft.Extensions.DependencyInjection;
+using SmartGrid.Application.Interfaces.Messaging;
 using SmartGrid.Application.Interfaces.Repositories;
 using SmartGrid.Application.Interfaces.Storage;
 using SmartGrid.Domain.Models;
 using SmartGrid.Infrastructure.Persistence.AzureBlob.Storages;
+using SmartGrid.Infrastructure.Persistence.AzureQueue.Services;
 using SmartGrid.Infrastructure.Persistence.AzureTable.Common;
 using SmartGrid.Infrastructure.Persistence.AzureTable.Entities;
 using SmartGrid.Infrastructure.Persistence.AzureTable.KeyProviders;
@@ -43,12 +46,29 @@ namespace SmartGrid.Infrastructure.Extensions
             return services;
         }
         public static IServiceCollection AddAzureBlobs(
-           this IServiceCollection services,
-           string connectionString)
+            this IServiceCollection services,
+            string connectionString)
         {
             services.AddSingleton(sp => new BlobServiceClient(connectionString));
 
             services.AddScoped<IFirmwareBlobStorage, FirmwareBlobStorage>();
+
+            return services;
+        }
+        public static IServiceCollection AddAzureQueues(
+            this IServiceCollection services,
+            string connectionString)
+        {
+            services.AddSingleton(sp =>
+            {
+                return new QueueServiceClient(connectionString, new QueueClientOptions
+                {
+                    MessageEncoding = QueueMessageEncoding.Base64
+                });
+            });
+
+            services.AddScoped<IAlertQueueService, AlertQueueService>();
+            services.AddScoped<IDeviceStatusQueueService, DeviceStatusQueueService>();
 
             return services;
         }

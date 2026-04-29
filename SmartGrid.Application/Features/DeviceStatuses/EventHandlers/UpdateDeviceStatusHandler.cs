@@ -5,11 +5,10 @@ using SmartGrid.Application.Interfaces.Repositories;
 
 namespace SmartGrid.Application.Features.DeviceStatuses.EventHandlers;
 
-public class UpdateDeviceStatusHandler(
+internal class UpdateDeviceStatusHandler(
         IDeviceRepository deviceRepository,
         ILogger<UpdateDeviceStatusHandler> logger) : INotificationHandler<TelemetryProcessedEvent>
 {
-
     public async Task Handle(TelemetryProcessedEvent notification, CancellationToken ct)
     {
         var telemetry = notification.Telemetry;

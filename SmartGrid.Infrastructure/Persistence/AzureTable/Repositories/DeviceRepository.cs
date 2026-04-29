@@ -28,6 +28,14 @@ namespace SmartGrid.Infrastructure.Persistence.AzureTable.Repositories
         private readonly TableClient _statusTableClient = tableServiceClient.GetTableClient(options.Value.DeviceStatusesTable);
         private readonly ITableMapper<DeviceStatus, DeviceStatusEntity> _statusMapper = statusMapper;
 
+        public async Task<IReadOnlyCollection<Device>> GetAllDevicesAsync(CancellationToken ct = default)
+        {
+            return await base.QueryAsync(string.Empty, ct);
+        }
+        public async Task<Device?> GetByIdAsync(DeviceType deviceType, EntityId deviceId, CancellationToken ct = default)
+        {
+            return await base.GetByIdAsync(deviceType.ToString(), deviceId, ct);
+        }
         public async Task<Device?> GetWithStatusByIdAsync(DeviceType deviceType, EntityId deviceId, CancellationToken ct = default)
         {
             var partitionKey = deviceType.ToString();
@@ -62,7 +70,10 @@ namespace SmartGrid.Infrastructure.Persistence.AzureTable.Repositories
 
             return loadResult.IsSuccess ? loadResult.Value : null;
         }
-
+        public async Task<IReadOnlyCollection<Device>> GetAllAsync(CancellationToken ct = default)
+        {
+            return await base.QueryAsync(string.Empty, ct);
+        }
         public async IAsyncEnumerable<Device> GetAllWithStatusStreamingAsync([EnumeratorCancellation] CancellationToken ct = default)
         {
             var deviceEntities = base._tableClient.QueryAsync<DeviceEntity>(cancellationToken: ct);
@@ -83,7 +94,40 @@ namespace SmartGrid.Infrastructure.Persistence.AzureTable.Repositories
                     yield return loadResult.Value;
             }
         }
-       
+        public async Task<IReadOnlyCollection<Device>> GetAllWithStatusByTypeAsync(DeviceType type, CancellationToken ct = default)
+        {
+            var result = new List<Device>();
+            var query = _statusTableClient.QueryAsync<DeviceStatusEntity>(
+                s => s.PartitionKey == type.ToString(),
+                cancellationToken: ct);
+
+            await foreach (var entity in query)
+            {
+                var status = _statusMapper.ToDomain(entity);
+                if (status is null)
+                    continue;
+
+                var device = await base.GetByIdAsync(type.ToString(), status.DeviceId, ct);
+                if (device is null)
+                    continue;
+
+                var loadResult = Device.Load(
+                    device.Id.Value,
+                    device.Type,
+                    device.Name,
+                    device.NominalPower.Value,
+                    device.Location,
+                    device.RegisteredAt,
+                    status
+                );
+
+                if (loadResult.IsSuccess)
+                    result.Add(loadResult.Value);
+            }
+
+            return result;
+        }
+
         public async Task SaveAsync(Device device, CancellationToken ct = default)
         {
             await base.AddAsync(device, ct);

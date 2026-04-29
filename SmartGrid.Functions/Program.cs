@@ -8,7 +8,6 @@ using SmartGrid.Infrastructure;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-
 var builder = FunctionsApplication.CreateBuilder(args);
 
 // HTTP API JSON configuration

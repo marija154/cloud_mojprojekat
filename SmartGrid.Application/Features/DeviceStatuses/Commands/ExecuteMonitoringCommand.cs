@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using SmartGrid.Application.Interfaces;
+using SmartGrid.Application.Interfaces.Messaging;
 using SmartGrid.Application.Interfaces.Repositories;
 using SmartGrid.Domain.Common;
 using SmartGrid.Domain.Enums;
@@ -14,6 +15,7 @@ public record ExecuteMonitoringCommand : IRequest<Result>;
 internal class ExecuteMonitoringHandler(
     IDeviceRepository deviceRepository,
     IDomainEventDispatcher dispatcher,
+    IDeviceStatusQueueService deviceStatusQueueService,
     IParallelSettingsProvider parallelSettings,
     ILogger<ExecuteMonitoringHandler> logger,
     IDateTimeProvider dateTimeProvider
@@ -35,6 +37,8 @@ internal class ExecuteMonitoringHandler(
             {
                 try
                 {
+                    await deviceStatusQueueService.SendStatusUpdateAsync(device.Status, token);
+
                     device.EvaluateMonitoring(dateTimeProvider.UtcNow);
 
                     if (device.DomainEvents.Count != 0)
