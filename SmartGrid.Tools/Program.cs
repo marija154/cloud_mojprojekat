@@ -1,6 +1,7 @@
 ﻿using Azure.Data.Tables;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Azure.Storage.Queues;
 
 const string ConnectionString = "UseDevelopmentStorage=true";
 
@@ -10,9 +11,11 @@ Console.WriteLine();
 
 var tables = new[] { "Devices", "Telemetries", "DeviceStatuses", "Firmwares" };
 var blobs = new[] { "firmware-updates" };
+var queues = new[] { "alert-queue"};
 
 var tableServiceClient = new TableServiceClient(ConnectionString);
 var blobServiceClient = new BlobServiceClient(ConnectionString);
+var queueServiceClient = new QueueServiceClient(ConnectionString);
 
 foreach (var tableName in tables)
 {
@@ -73,6 +76,35 @@ foreach (var blobContainerName in blobs)
                 await Task.Delay(1000);
             }
         }
+
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine(" [OK]");
+        Console.ResetColor();
+    }
+    catch (Exception ex)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($" [FAILED] - Error: {ex.Message}");
+        Console.ResetColor();
+    }
+}
+
+foreach (var queueName in queues)
+{
+    try
+    {
+        await queueServiceClient.GetQueueClient(queueName).CreateIfNotExistsAsync();
+
+        Console.Write($"Deleting queue (if exists): {queueName}...");
+
+        await queueServiceClient.DeleteQueueAsync(queueName);
+
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine(" [DELETED]");
+        Console.ResetColor();
+
+        Console.Write($"Creating fresh queue: {queueName}...");
+        await queueServiceClient.CreateQueueAsync(queueName);
 
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine(" [OK]");
